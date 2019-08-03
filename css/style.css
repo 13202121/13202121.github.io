@@ -34,11 +34,13 @@ body {
 
 .body_container {
   padding: 0 60px;
-  max-width: 1150px;
+  max-width: 1366px;
   margin: 0 auto; }
 
+.pure-u-md-3-4 {
+  padding-right: 50px; }
+
 .content_container {
-  padding-right: 50px;
   padding-top: 20px; }
 
 a, button.submit {
@@ -60,6 +62,9 @@ a:focus {
 
 div {
   box-sizing: border-box; }
+
+.gutter pre {
+  overflow: visible; }
 
 #header {
   padding: 58px 0 0;
@@ -361,8 +366,8 @@ div {
 @media print, screen and (max-width: 48em) {
   .body_container {
     padding: 0 30px; }
-  .content_container {
-    padding-right: 15px; }
+  .pure-u-md-3-4 {
+    padding-right: 0; }
   .hidden_mid_and_down {
     display: none !important; }
   #sidebar {
@@ -812,13 +817,13 @@ figure.highlight,
     width: 100%; }
     figure.highlight .code pre,
     .codeblock .code pre {
-      max-width: 700px;
       overflow-x: auto;
       overflow-y: hidden; }
   figure.highlight .line,
   .codeblock .line {
     height: 1.3em;
-    font-size: 13px; }
+    font-size: 13px;
+    line-height: 1.6; }
 
 .gist .line,
 .gist .line-number {
