@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>Mysql 开启远程访问权限</title>
+      <link href="/2019/08/03/Mysql-%E5%BC%80%E5%90%AF%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE%E6%9D%83%E9%99%90/"/>
+      <url>/2019/08/03/Mysql-%E5%BC%80%E5%90%AF%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE%E6%9D%83%E9%99%90/</url>
+      
+        <content type="html"><![CDATA[<p>由于默认mysql的用户是没有开启远程访问的权限的，因此当客户端跟mysql数据库不在同一台服务器上时，客户端将无法正常访问mysql服务器，需要开启mysql的远程访问权限才能正常访问mysql服务器。</p><p>主要有两种方法，改表法和授权法。</p><a id="more"></a><ul><li><p>改表法</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">mysql&gt;</span> USE MYSQL;   </span><br><span class="line"><span class="meta">mysql&gt;</span> UPDATE USER SET host = '%' WHERE user = 'root';</span><br></pre></td></tr></table></figure></li><li><p>授权法：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">mysql&gt;</span> USE MYSQL;  </span><br><span class="line"><span class="meta">#</span> 赋予任何主机访问以及修改所有数据的权限</span><br><span class="line"><span class="meta">mysql&gt;</span> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION    </span><br><span class="line"><span class="meta">#</span> 例如，你想root用户使用root从任何主机连接到mysql服务器的话。  </span><br><span class="line">GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;   </span><br><span class="line"><span class="meta">#</span> 如果你想允许用户root从ip为192.168.1.123的主机连接到mysql服务器，并使用root作为密码   </span><br><span class="line">GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.1.123'IDENTIFIED BY 'root' WITH GRANT OPTION;   </span><br><span class="line"><span class="meta">#</span> 修改生效</span><br><span class="line"><span class="meta">mysql&gt;</span> FLUSH PRIVILEGES</span><br></pre></td></tr></table></figure></li></ul><p>本人建议采用授权法。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 教程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Mysql </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
