@@ -9,8 +9,8 @@
 
 @font-face
 {
-font-family: Monaco;
-src: url('../Monaco.ttf');
+    font-family: Monaco;
+    src: url('../font/Monaco.ttf');
 }
 
 pure css setting
@@ -24,6 +24,10 @@ html, button, input, select, textarea,
   /* Set your content font stack here: */
   font-family: "Monaco","Consolas","PingFangSC-Regular", Helvetica, "Helvetica Neue", "Segoe UI", "Hiragino Sans GB", "Source Han Sans CN", "Microsoft YaHei", "STHeiti", "WenQuanYi Micro Hei", sans-serif !important; }
 
+@font-face {
+  font-family: Monaco;
+  src: url("../font/Monaco.ttf"); }
+
 body {
   background-color: #FFF;
   color: #444;
@@ -32,9 +36,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px; }
 
+@media print, screen and (max-width: 1024px) {
+  .body_container {
+    max-width: 960px; } }
+
+@media print, screen and (min-width: 1366px) {
+  .body_container {
+    max-width: 1024px; } }
+
+@media print, screen and (min-width: 1920px) {
+  .body_container {
+    max-width: 1366px; } }
+
 .body_container {
   padding: 0 60px;
-  max-width: 1366px;
   margin: 0 auto; }
 
 .pure-u-md-3-4 {
@@ -178,7 +193,7 @@ div {
     margin: 0;
     color: #555;
     text-align: left;
-    font: bold 25px/1.1 "Monaco","ff-tisa-web-pro", Cambria, "Times New Roman", Georgia, Times, sans-serif; }
+    font: bold 22px/1.1 "Monaco","ff-tisa-web-pro", Cambria, "Times New Roman", Georgia, Times, sans-serif; }
     .post .post-title a {
       color: #555; }
   .post .post-meta {
@@ -252,7 +267,7 @@ div {
         margin: 0 5px;
         padding: 0 5px;
         background: #f7f8f8;
-        font-family: "Monaco",Menlo, Consolas, monospace !important; }
+        font-family: "Monaco",Menlo, Consolas, Monacoospace !important; }
       .post .post-content p a {
         color: #01579f;
         padding-bottom: 2px;
@@ -286,7 +301,7 @@ div {
         margin: 0 5px;
         padding: 0px 5px;
         background: #f7f8f8;
-        font-family: "Monaco",Menlo, Consolas, monospace !important; }
+        font-family: "Monaco",Menlo, Consolas, Monacoospace !important; }
       .post .post-content ul a, .post .post-content ol a {
         color: #01579f;
         padding-bottom: 2px;
@@ -294,7 +309,7 @@ div {
         .post .post-content ul a:hover, .post .post-content ol a:hover {
           text-decoration: underline; }
   .post .tags {
-    padding-bottom: 1em; }
+    padding: 1em 0; }
     .post .tags a {
       margin-right: .5em; }
       .post .tags a:before {
@@ -782,7 +797,7 @@ figure.highlight,
   .codeblock .code,
   .codeblock .tag {
     background-color: inherit;
-    font-family: "Monaco",Menlo, Consolas, monospace;
+    font-family: "Monaco",Menlo, Consolas, Monacoospace;
     border: none;
     padding: 0;
     margin: 0;
@@ -827,7 +842,7 @@ figure.highlight,
 
 .gist .line,
 .gist .line-number {
-  font-family: "Monaco",Menlo, Consolas, monospace;
+  font-family: "Monaco",Menlo, Consolas, Monacoospace;
   font-size: 1em;
   margin: 0 0 5px 0; }
 
@@ -840,7 +855,7 @@ figure.highlight,
 .highlight .keyword {
   color: #a71d5d; }
 
-.highlight.apacheconf .code .common,
+.highlight.apacheconf .code .comMonaco,
 .highlight.apacheconf .code .nomarkup,
 .highlight.apacheconf .code .attribute,
 .highlight.apacheconf .code .variable,
