@@ -36,17 +36,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px; }
 
-@media print, screen and (max-width: 1024px) {
-  .body_container {
-    max-width: 960px; } }
-
-@media print, screen and (min-width: 1366px) {
+@media print, screen and (max-width: 1366px) {
   .body_container {
     max-width: 1024px; } }
 
-@media print, screen and (min-width: 1920px) {
+@media print, screen and (min-width: 1440px) {
   .body_container {
     max-width: 1366px; } }
+
+@media print, screen and (min-width: 1920px) {
+  .body_container {
+    max-width: 1440px; } }
 
 .body_container {
   padding: 0 60px;
