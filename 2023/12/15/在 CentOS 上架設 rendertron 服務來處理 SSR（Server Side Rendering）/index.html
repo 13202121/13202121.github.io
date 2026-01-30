@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>在 CentOS 上架設 rendertron 服務來處理 SSR（Server Side Rendering） | 码夫 Code Mover</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/normalize.min.css"><link rel="stylesheet" type="text/css" href="/css/pure-min.css"><link rel="stylesheet" type="text/css" href="/css/grids-responsive-min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="/js/jquery.min.js"></script><link rel="icon" mask sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">在 CentOS 上架設 rendertron 服務來處理 SSR（Server Side Rendering）</h1><a id="logo" href="/.">码夫 Code Mover</a><p class="description">我是一个写Bug的代码搬运工</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-4-4"><div class="content_container"><div class="post"><h1 class="post-title">在 CentOS 上架設 rendertron 服務來處理 SSR（Server Side Rendering）</h1><div class="post-meta">2023-12-15<span> | </span><span class="category"><a href="/categories/教程/">教程</a></span></div><div class="post-content"><p>公司的網站是採用 SPA（Single Page Application）的呈現方式，但是這種方式不利於 SEO、不利於 Preview，像是在 Facebook、Line、Twitter 分享連結的時候，沒有內容的預覽，在行銷推廣上就略遜一籌，今天就要來介紹一個 SSR（Server Side Rendering）的服務 - <a href="https://github.com/GoogleChrome/rendertron" target="_blank" rel="noopener">rendertron</a>。</p>
+<p>rendertron 是 Google Chrome 的子專案，背後使用 <a href="https://zh.wikipedia.org/wiki/Chromium" target="_blank" rel="noopener">Chromium</a> 來渲染轉發過來的網址，再將渲染後的結果回傳，網站的程式都不用改，只需要加一個 Middleware 來判斷是否要轉發給 rendertron 去處理即可，rendertron 的開發團隊有架設一個對外的服務 <a href="https://render-tron.appspot.com/" target="_blank" rel="noopener">https://render-tron.appspot.com/</a>，大家可以上去玩玩看。</p>
+<p>再來，我們試著把 rendertron 服務架設在 CentOS 7 上，這過程踩了不少雷，吃了不少苦頭，希望這篇文章能讓大家少走一點冤枉路。</p>
+<h2 id="切換到-root-身份"><a href="#切換到-root-身份" class="headerlink" title="切換到 root 身份"></a>切換到 root 身份</h2><p>整個過程我建議切換到 root 身份來做，會比較順利一點。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo -i</span><br></pre></td></tr></table></figure>
+
+<h2 id="Clone-rendertron"><a href="#Clone-rendertron" class="headerlink" title="Clone rendertron"></a>Clone rendertron</h2><p>因為我要去改 rendertron 的預設參數，所以我必須自行建置 rendertron，如果不需要改參數，rendertron 是可以用 npm 安裝成全域的套件，挺方便的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安裝 git </span></span><br><span class="line">yum install -y git </span><br><span class="line"></span><br><span class="line"><span class="comment"># Clone rendertron </span></span><br><span class="line"><span class="built_in">cd</span> /usr/lib </span><br><span class="line">git <span class="built_in">clone</span> https://github.com/GoogleChrome/rendertron </span><br><span class="line"><span class="built_in">cd</span> rendertron</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>記得要確認我們所在的目錄是在 rendertron 底下，不然一些依賴套件會裝錯位置。</p>
+</blockquote>
+<h2 id="安裝-Node-js-官方的-Repository"><a href="#安裝-Node-js-官方的-Repository" class="headerlink" title="安裝 Node.js 官方的 Repository"></a>安裝 Node.js 官方的 Repository</h2><p><a href="https://fedoraproject.org/wiki/EPEL" target="_blank" rel="noopener">EPEL</a> 上面的 <code>Node.js</code> 版本太舊了，我們安裝官方提供的 Repository，安裝的版本是 <code>14.x</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 root 身份底下</span></span><br><span class="line">curl -sL https://rpm.nodesource.com/setup_14.x | bash - </span><br><span class="line"></span><br><span class="line"><span class="comment"># 非 root 身份 </span></span><br><span class="line">curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -</span><br></pre></td></tr></table></figure>
+
+<h2 id="安裝-Node-js"><a href="#安裝-Node-js" class="headerlink" title="安裝 Node.js"></a>安裝 Node.js</h2><p>接著，我們就將 <code>Node.js</code> 裝起來，版本是 <code>14.5.0</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y nodejs</span><br></pre></td></tr></table></figure>
+
+<h2 id="建立-config-json-修改預設參數"><a href="#建立-config-json-修改預設參數" class="headerlink" title="建立 config.json 修改預設參數"></a>建立 config.json 修改預設參數</h2><p>我想要改的參數是 <code>timeout</code> 跟 <code>port</code>，在 rendertron 的根目錄底下建立 <code>config.json</code> 檔案，把想要改的參數放進去。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123; </span><br><span class="line">	<span class="string">"timeout"</span>: 20000, </span><br><span class="line">	<span class="string">"port"</span>: 3001 </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="安裝-grpc"><a href="#安裝-grpc" class="headerlink" title="安裝 grpc"></a>安裝 grpc</h2><p>rendertron 的依賴樹中有依賴到 grpc，但是在安裝依賴套件的過程中，找不到 grpc 預先編譯的版本，然後它就會走向自行編譯的流程，接著就出錯了。</p>
+<p><img src="/images/i89qd5w.png" alt></p>
+<p>我們是可以把 gcc 編譯工具裝起來，依舊能順利編譯，只不過這有點耗時，其實只要先獨立安裝 grpc 就好了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install grpc --unsafe-perm=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>再來，我們就可以建置 rendertron，執行下面指令進行建置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安裝依賴套件 </span></span><br><span class="line">npm install --unsafe-perm=<span class="literal">true</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 建置 rendertron </span></span><br><span class="line">npm run build</span><br></pre></td></tr></table></figure>
+
+<h2 id="安裝缺少的-Library-或-Google-Chrome-瀏覽器"><a href="#安裝缺少的-Library-或-Google-Chrome-瀏覽器" class="headerlink" title="安裝缺少的 Library 或 Google Chrome 瀏覽器"></a>安裝缺少的 Library 或 Google Chrome 瀏覽器</h2><p>如果這時候我們去執行 rendertron，會跑出一個錯誤畫面。</p>
+<p><img src="/images/AKuNupW.png" alt></p>
+<p>意思是說，在跑 Chromium 的時候少了一些檔案，如果想要知道究竟缺了哪些檔案，可以到切換目錄到 <code>/usr/lib/rendertron/node_modules/puppeteer/.local-chromium/linux-xxxxxx/chrome-linux</code> 底下，執行指令 <code>ldd chrome | grep not</code> 就會列出缺少的檔案。</p>
+<p><img src="/images/9OcqUej.png" alt></p>
+<p>然後呢，我們就要再透過 <code>yum provides xxx</code> 指令去找出這些檔案在哪些 Library 裡面。</p>
+<p><img src="/images/PikOOzY.png" alt></p>
+<p>各位朋友，不需要一個一個去找了，我已經幫各位找好了，執行下面指令就可以將這些缺少的 Library 裝起來。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install libXcomposite libXcursor libXdamage libXext libXfixes libXi libXrender libXtst cups-libs libXScrnSaver libXrandr atk at-spi2-atk pango cairo at-spi2-core gtk3 gdk-pixbuf2</span><br></pre></td></tr></table></figure>
+
+<p>或者，如果想省麻煩，也可以直接安裝 Google Chrome，在 <code>/etc/yum.repos.d</code> 資料夾底下新增 <code>google-chrome.repo</code> 檔案，將以下內容寫到這個檔案中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[google-chrome] </span><br><span class="line">name=google-chrome </span><br><span class="line">baseurl=http://dl.google.com/linux/chrome/rpm/stable/x86_64 </span><br><span class="line">enabled=1 </span><br><span class="line">gpgcheck=1 </span><br><span class="line">gpgkey=https://dl.google.com/linux/linux_signing_key.pub</span><br></pre></td></tr></table></figure>
+
+<p>接著，執行下面指令，就可以將最新穩定版本的 Google Chrome 瀏覽器裝起來。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y google-chrome-stable</span><br></pre></td></tr></table></figure>
+
+<h2 id="執行-rendertron"><a href="#執行-rendertron" class="headerlink" title="執行 rendertron"></a>執行 rendertron</h2><p>把該裝的裝一裝之後，我們就可以執行下面指令把 rendertron 跑起來，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run start</span><br></pre></td></tr></table></figure>
+
+<p>我們看到 <code>Listening on port xxxx</code> 的訊息，就表示執行成功了。</p>
+<p><img src="/images/hL7taGi.png" alt></p>
+<p>來測試一下，rendertron 服務有一個 <code>render</code> API，只要把要渲染的網址接到它的後面，就可以了。</p>
+<p><img src="/images/OujN89Z.png" alt></p>
+<p>而且，它還可以截圖，截圖的 API 是 <code>screenshot</code>，預設的圖片大小是 1000×1000，這個可以透過參數 <code>width</code>、<code>height</code> 去改。</p>
+<p><img src="/images/p96VYOY.png" alt></p>
+<h2 id="用-pm2-來管理-rendertron"><a href="#用-pm2-來管理-rendertron" class="headerlink" title="用 pm2 來管理 rendertron"></a>用 pm2 來管理 rendertron</h2><p><code>pm2</code> 是一個 Node.js 服務的管理器，我們可以透過它來管理 rendertron 的<code>開機啟動</code>、<code>背景執行</code>、<code>壞掉重啟</code>，相當方便，我們來安裝 pm2。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -g 表示安裝成全域的套件 </span></span><br><span class="line">npm install -g pm2</span><br></pre></td></tr></table></figure>
+
+<p>接著，執行下面的指令就可以叫 pm2 來幫我們管理 rendertron。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 透過 pm2 啟動 rendertron，名稱為 rendertron，且在每日 06:00:00 強制重啟。 </span></span><br><span class="line">pm2 start build/rendertron.js --name rendertron --cron <span class="string">"0 0 6 * *"</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 保存目前 pm2 管理的程序清單 </span></span><br><span class="line">pm2 save </span><br><span class="line"></span><br><span class="line"><span class="comment"># 依照剛剛保存的程序清單建立服務，並設為開機啟動。 </span></span><br><span class="line">pm2 startup systemd</span><br></pre></td></tr></table></figure>
+
+<p>以上就是 rendertron 3.0.0 安裝在 CentOS 7 上的步驟，提供給各位朋友參考。</p>
+<h2 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h2><ul>
+<li><a href="https://www.jianshu.com/p/38e6d3bf596d" target="_blank" rel="noopener">安裝部署 rendertron 教程</a></li>
+<li><a href="https://tn710617.github.io/zh-tw/pm2/" target="_blank" rel="noopener">pm2 - 用法大全</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/33691734" target="_blank" rel="noopener">centos7 systemd pm2 開機啟動</a></li>
+</ul>
+</div><div class="tags"><a href="/tags/SSR/">SSR</a></div><div class="post-nav"><a class="pre" href="/2026/01/27/Linux安装Nginx服务教程/">Linux安装Nginx服务教程</a><a class="next" href="/2023/07/20/缓存穿透、缓存击穿、缓存雪崩/">缓存穿透、缓存击穿、缓存雪崩</a></div></div></div></div><div class="pure-u-1 pure-u-md-4-4"><div id="footer">Copyright © 2026 <a href="/." rel="nofollow">码夫 Code Mover.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

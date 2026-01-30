@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>利用OpenSSL创建自签Https证书 | 码夫 Code Mover</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/normalize.min.css"><link rel="stylesheet" type="text/css" href="/css/pure-min.css"><link rel="stylesheet" type="text/css" href="/css/grids-responsive-min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="/js/jquery.min.js"></script><link rel="icon" mask sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">利用OpenSSL创建自签Https证书</h1><a id="logo" href="/.">码夫 Code Mover</a><p class="description">我是一个写Bug的代码搬运工</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-4-4"><div class="content_container"><div class="post"><h1 class="post-title">利用OpenSSL创建自签Https证书</h1><div class="post-meta">2023-05-15<span> | </span><span class="category"><a href="/categories/教程/">教程</a></span></div><div class="post-content"><p>OpenSSL一般默认都有安装，所以直接使用即可，如果服务器没有该命令同样自行百度安装。</p>
+<p>生成HTTPS证书需要以下步骤：</p>
+<ul>
+<li>生成私钥（key）</li>
+</ul>
+<p>在合适的文件夹下输入该命令，使用 openssl 命令生成私钥它将生成名为 private.key 的RSA密钥文件，至少使用2048位的密钥长度，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out private.key 2048</span><br></pre></td></tr></table></figure>
+
+<p>这将生成一个2048位的RSA私钥，并将其保存到 private.key 文件中。</p>
+<ul>
+<li>生成证书签名请求（CSR）</li>
+</ul>
+<p>使用 openssl 命令生成证书签名请求，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -key private.key -out server.csr</span><br><span class="line"></span><br><span class="line">CountryName: CN</span><br><span class="line">ProvinceName: Guangdong</span><br><span class="line">Locality Name: Guangzhou</span><br><span class="line">Organization Name: ABC</span><br><span class="line">Organizational Unti Name: ABC</span><br><span class="line">Common Name: 填自己的域名或者服务器ip地址</span><br><span class="line">Email Adress: 123@163.com</span><br><span class="line">A Challenge password: 因为是可选的所以直接回车即可</span><br><span class="line">An optional company name: 同样是可选的所以直接回车即可</span><br></pre></td></tr></table></figure>
+
+<p>这将使用 private.key 文件中的私钥生成一个证书签名请求，并将其保存到 server.csr 文件中。在此过程中，您需要提供一些证书信息，如国家、省份、城市、组织名称、通用名称等。</p>
+<ul>
+<li>自签名证书</li>
+</ul>
+<p>使用 openssl 命令自签名证书，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -req -days 3650 -<span class="keyword">in</span> server.csr -signkey private.key -out server.crt</span><br></pre></td></tr></table></figure>
+
+<p>这将使用 server.csr 文件中的 CSR 和 private.key 文件中的私钥生成一个自签名证书，并将其保存到 server.crt 文件中。<br>在此过程中，您需要指定证书的有效期（以天为单位），这里我指定有效时间为 <em>3650</em> 天，也就是 <em>10</em> 年。</p>
+<blockquote>
+<p>请注意，自签名证书只适用于测试和开发环境，不应在生产环境中使用。在生产环境中，您应该从受信任的证书颁发机构（CA）购买证书。</p>
+</blockquote>
+</div><div class="tags"><a href="/tags/Linux/">Linux</a></div><div class="post-nav"><a class="pre" href="/2023/07/20/缓存穿透、缓存击穿、缓存雪崩/">缓存穿透、缓存击穿、缓存雪崩</a><a class="next" href="/2023/05/12/Nginx部署Vue项目使用下上文/">Nginx部署Vue项目使用下上文</a></div></div></div></div><div class="pure-u-1 pure-u-md-4-4"><div id="footer">Copyright © 2026 <a href="/." rel="nofollow">码夫 Code Mover.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

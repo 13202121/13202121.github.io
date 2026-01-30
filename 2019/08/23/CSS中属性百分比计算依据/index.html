@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>CSS中属性百分比计算依据 | 码夫 Code Mover</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/normalize.min.css"><link rel="stylesheet" type="text/css" href="/css/pure-min.css"><link rel="stylesheet" type="text/css" href="/css/grids-responsive-min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="/js/jquery.min.js"></script><link rel="icon" mask sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">CSS中属性百分比计算依据</h1><a id="logo" href="/.">码夫 Code Mover</a><p class="description">我是一个写Bug的代码搬运工</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-4-4"><div class="content_container"><div class="post"><h1 class="post-title">CSS中属性百分比计算依据</h1><div class="post-meta">2019-08-23<span> | </span><span class="category"><a href="/categories/前端/">前端</a></span></div><div class="post-content"><p>在CSS属性中，很多属性的取值可以采用百分比制，比如：width、height、padding、margin、font-size、line-height、background-position等，那么他们的计算依据是什么呢？</p>
+<a id="more"></a>
+
+<p>根据相关实例测试，现得出以下结论：</p>
+<ul>
+<li><p>font-size</p>
+<p>当前的字体大小等于100%</p>
+</li>
+<li><p>line-height</p>
+<p>line-height的计算值就是当前字体的值乘以该百分比。</p>
+</li>
+<li><p>width</p>
+<p>正常文档流中和设置浮动的情况下，相对于父元素content-box的宽度；绝对定位时，相对于包含块padding-box的宽度。</p>
+</li>
+<li><p>height</p>
+<p>height对百分比也是支持的，但是其和width还是有一个明显的区别：当父元素width属性为auto时，子元素宽度仍然可以使用百分比设置。但是对于height，只要子元素还是在正常文档流当中的，如果父元素的height属性为auto，则子元素height设置为百分比会被忽略。规范中指出：如果包含块的高度没有显式指出（即高度由内容决定），并且该元素不是绝对定位，则计算值为auto。而auto*100/100=NaN。经常我们希望body的高度为100%，那么我们需要做如下设置：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">html</span>,<span class="selector-tag">body</span>&#123;</span><br><span class="line">	<span class="attribute">height</span>:<span class="number">100%</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>margin、padding</p>
+<p>无论是垂直或水平方向，均是相对于父元素的宽度，正常文档流中和设置浮动的情况下，相对于父元素content-box的宽度；绝对定位时，相对于包含块padding-box的宽度。</p>
+</li>
+<li><p>定位元素的left/right/bottom/top百分比值</p>
+<p>top,bottom设置百分比定位是按包含块padding-box的高度来计算的，同样left,right,设置百分比定位是按包含块padding-box的宽度来计算的。</p>
+</li>
+<li><p>background-position</p>
+<p>使用关键字和百分比的情况下，设定的值同时应用于元素和图片，换句话说，如果设定了20% 20% ,则外部元素水平20%的位置和图片水平20%的位置对齐、外部元素垂直20%的位置和图片垂直20%的位置对齐。设背景的区域高度为containerY、宽度为containerX，背景图片的宽度为imgX、高度为imgY，针对对齐点，计算出图片相对于左上角：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">top: containerY * <span class="number">20</span>% - imgY * <span class="number">20</span>% = (containerY - imgY) * <span class="number">20</span>%;</span><br><span class="line">left: containerX * <span class="number">20</span>% - imgX * <span class="number">20</span>% = (containerX - imgX) * <span class="number">20</span>%;</span><br><span class="line"></span><br><span class="line">换算过程为：</span><br><span class="line">(设置背景的区域高度 - 背景图的高度) * 百分比（正或负值），如：</span><br><span class="line">(<span class="number">100</span> - <span class="number">200</span>) * (<span class="number">-50</span>%) = <span class="number">50</span>px。</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+</div><div class="tags"><a href="/tags/CSS/">CSS</a></div><div class="post-nav"><a class="pre" href="/2019/12/30/Java编码技巧之高效代码54例-高德/">Java编码技巧之高效代码54例--高德</a><a class="next" href="/2019/08/23/关于前端的一些坑/">关于前端的一些坑</a></div></div></div></div><div class="pure-u-1 pure-u-md-4-4"><div id="footer">Copyright © 2026 <a href="/." rel="nofollow">码夫 Code Mover.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
