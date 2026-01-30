@@ -259,6 +259,7 @@ div {
     .post .post-content pre code {
       padding: 0 2em; }
     .post .post-content p {
+      text-indent: 2em;
       margin: 0 0 1.234em;
       word-break: break-word;
       overflow-wrap: break-word; }
